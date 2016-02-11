@@ -180,7 +180,7 @@
                 $timeout.cancel(resetCommandTimeout);
             }, function(result){
                 $scope.interimResult = result[0];
-                resetCommandTimeout = $timeout(restCommand, 3000);
+                resetCommandTimeout = $timeout(restCommand, 5000);
             });
         };
 
