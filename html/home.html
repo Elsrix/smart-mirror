@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html ng-app="SmartMirror">
+<body ng-controller="MirrorCtrl">
+
+<div class="containter-top-right">
+	<div class="time animated flipInX">{{date | date : 'hh:mm'}}</div>
+	<div class="greeting grey animated flipInX">{{greeting}}</div>
+</div>
+
+<div class="container-bottom-center">
+	
+	<div class="animate-wave-box" ng-show="listening">
+		<span class="animate-wave-span a5"/>
+		<span class="animate-wave-span a1"/>
+		<span class="animate-wave-span a3"/>
+		<span class="animate-wave-span a2"/>
+		<span class="animate-wave-span a1"/>
+		<span class="animate-wave-span a2"/>
+		<span class="animate-wave-span a1"/>
+		<span class="animate-wave-span a4"/>
+		<span class="animate-wave-span a5"/>
+	</div>
+	
+	<div class="interim-result animated bounceIn" ng-bind="interimResult"></div>
+	
+    <!-- Command list -->
+    <div class="commands animate-grow" ng-show="focus == 'commands'">
+		
+      <dl>
+		<dt class="grey">Available Commands</dt>
+        <dd class="light-grey">My name is ...</dd>
+        <dd class="light-grey">Weather in ...</dd>
+        <dd class="light-grey">Map of ....</dd>
+        <dd class="light-grey">Direction to ...</dd>
+        <dd class="light-grey">Exit</dd>
+      </dl>
+    </div>
+	
+	
+</div>
+	
+</body>
+</html>

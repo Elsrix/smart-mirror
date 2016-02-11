@@ -1,5 +1,5 @@
 //! annyang
-//! version : 2.0.0
+//! version : 2.2.1
 //! author  : Tal Ater @TalAter
 //! license : MIT
 //! https://www.TalAter.com/annyang/
@@ -36,12 +36,18 @@
 
   var commandsList = [];
   var recognition;
-  var callbacks = { start: [], error: [], end: [], result: [], resultMatch: [], resultNoMatch: [], interimResult: [], errorNetwork: [], errorPermissionBlocked: [], errorPermissionDenied: [] };
+  /* Henry: add interimResult[]
+  var callbacks = { start: [], error: [], end: [], result: [], resultMatch: [], resultNoMatch: [], errorNetwork: [], errorPermissionBlocked: [], errorPermissionDenied: [] };
+  */
+  var callbacks = { start: [], error: [], end: [], result: [], resultMatch: [], resultNoMatch: [], 
+	  interimResult: [],
+	  errorNetwork: [], errorPermissionBlocked: [], errorPermissionDenied: [] };
   var autoRestart;
   var lastStartedAt = 0;
   var debugState = false;
   var debugStyle = 'font-weight: bold; color: #00f;';
   var pauseListening = false;
+  var isListening = false;
 
   // The command matching code is a modified version of Backbone.Router by Jeremy Ashkenas, under the MIT license.
   var optionalParam = /\s*\((.*?)\)\s*/g;
@@ -68,14 +74,14 @@
     });
   };
 
+  var isInitialized = function() {
+    return recognition !== undefined;
+  };
+
   var initIfNeeded = function() {
     if (!isInitialized()) {
       root.annyang.init({}, false);
     }
-  };
-
-  var isInitialized = function() {
-    return recognition !== undefined;
   };
 
   var registerCommand = function(command, cb, phrase) {
@@ -132,13 +138,16 @@
       // In HTTP,  turn on  continuous mode for much slower results, but no repeating security notices
       recognition.continuous = root.location.protocol === 'http:';
 
-      //Use interimResults to imporve performance
-      recognition.interimResults = true;
-
+	  /* Henry: Add this for interimResult to improve the performance */
+	  recognition.interimResults = true;
+	  
       // Sets the language to the default 'en-US'. This can be changed with annyang.setLanguage()
       recognition.lang = 'en-US';
 
-      recognition.onstart   = function()      { invokeCallbacks(callbacks.start); };
+      recognition.onstart   = function() {
+        isListening = true;
+        invokeCallbacks(callbacks.start);
+      };
 
       recognition.onerror   = function(event) {
         invokeCallbacks(callbacks.error);
@@ -161,19 +170,18 @@
       };
 
       recognition.onend     = function() {
-		  
+        isListening = false;
         invokeCallbacks(callbacks.end);
         // annyang will auto restart if it is closed automatically and not by user action.
         if (autoRestart) {
-			
           // play nicely with the browser, and never restart annyang automatically more than once per second
           var timeSinceLastStart = new Date().getTime()-lastStartedAt;
-		  
           if (timeSinceLastStart < 1000) {
             setTimeout(root.annyang.start, 1000-timeSinceLastStart);
           } else {
             //root.annyang.start();
-			setTimeout(root.annyang.start, 5000);
+			/* Henry: delay before the annyang resumes automatically. */
+			setTimeout(root.annyang.start, 3000);
           }
         }
       };
@@ -187,6 +195,14 @@
         }
 
         // Map the results to an array
+        // var SpeechRecognitionResult = event.results[event.resultIndex];
+        // var results = [];
+        // for (var k = 0; k<SpeechRecognitionResult.length; k++) {
+        //   results[k] = SpeechRecognitionResult[k].transcript;
+        // }
+        //
+        // invokeCallbacks(callbacks.result, results);
+		/* Henry: add interimResult here. */
         var SpeechRecognitionResult = event.results[event.resultIndex];
         var results = [];
         var finalResults = false
@@ -196,7 +212,7 @@
             results[k] = SpeechRecognitionResult[k].transcript;
           }
           else if(k == 0){
-            //root.console.log('Interim: %c' + SpeechRecognitionResult[k].transcript, debugStyle);
+            root.console.log('Interim: %c' + SpeechRecognitionResult[k].transcript, debugStyle);
             invokeCallbacks(callbacks.interimResult, SpeechRecognitionResult[k].transcript, null);
           }
         }
@@ -205,7 +221,8 @@
         if(finalResults){
           invokeCallbacks(callbacks.result, results);
         }
-
+		
+		
         var commandText;
         // go over each of the 5 results and alternative results received (we've set maxAlternatives to 5 above)
         for (var i = 0; i<results.length; i++) {
@@ -217,18 +234,19 @@
 
           // try and match recognized text to one of the commands on the list
           for (var j = 0, l = commandsList.length; j < l; j++) {
-            var result = commandsList[j].command.exec(commandText);
+            var currentCommand = commandsList[j];
+            var result = currentCommand.command.exec(commandText);
             if (result) {
               var parameters = result.slice(1);
               if (debugState) {
-                root.console.log('command matched: %c'+commandsList[j].originalPhrase, debugStyle);
+                root.console.log('command matched: %c'+currentCommand.originalPhrase, debugStyle);
                 if (parameters.length) {
                   root.console.log('with parameters', parameters);
                 }
               }
               // execute the matched command
-              commandsList[j].callback.apply(this, parameters);
-              invokeCallbacks(callbacks.resultMatch, commandText, commandsList[j].originalPhrase, results);
+              currentCommand.callback.apply(this, parameters);
+              invokeCallbacks(callbacks.resultMatch, commandText, currentCommand.originalPhrase, results);
               return true;
             }
           }
@@ -251,6 +269,7 @@
      * It's a good idea to call this after adding some commands first, but not mandatory.
      *
      * Receives an optional options object which supports the following options:
+     *
      * - `autoRestart` (Boolean, default: true) Should annyang restart itself if it is closed indirectly, because of silence or window conflicts?
      * - `continuous`  (Boolean, default: undefined) Allow forcing continuous mode on or off. Annyang is pretty smart about this, so only set this if you know what you're doing.
      *
@@ -297,7 +316,7 @@
      */
     abort: function() {
       autoRestart = false;
-      if (isInitialized) {
+      if (isInitialized()) {
         recognition.abort();
       }
     },
@@ -445,7 +464,7 @@
      *       * The phrase the user said that matched a command
      *       * The command that was matched
      *       * An array of possible alternative phrases the user might've said
-     * * `resultNoMatch` - Fired when what the user said didn't match any of the registered commands
+     * * `resultNoMatch` - Fired when what the user said didn't match any of the registered commands.
      *     Callback functions registered to this event will include an array of possible phrases the user might've said as the first argument
      *
      * #### Examples:
@@ -477,6 +496,82 @@
         return;
       }
       callbacks[type].push({callback: cb, context: context || this});
+    },
+
+    /**
+     * Remove callbacks from events.
+     *
+     * - Pass an event name and a callback command to remove that callback command from that event type.
+     * - Pass just an event name to remove all callback commands from that event type.
+     * - Pass undefined as event name and a callback command to remove that callback command from all event types.
+     * - Pass no params to remove all callback commands from all event types.
+     *
+     * #### Examples:
+     * ````javascript
+     * annyang.addCallback('start', myFunction1);
+     * annyang.addCallback('start', myFunction2);
+     * annyang.addCallback('end', myFunction1);
+     * annyang.addCallback('end', myFunction2);
+     *
+     * // Remove all callbacks from all events:
+     * annyang.removeCallback();
+     *
+     * // Remove all callbacks attached to end event:
+     * annyang.removeCallback('end');
+     *
+     * // Remove myFunction2 from being called on start:
+     * annyang.removeCallback('start', myFunction2);
+     *
+     * // Remove myFunction1 from being called on all events:
+     * annyang.removeCallback(undefined, myFunction1);
+     * ````
+     *
+     * @param type Name of event type to remove callback from
+     * @param callback The callback function to remove
+     * @returns undefined
+     * @method removeCallback
+     */
+    removeCallback: function(type, callback) {
+      var compareWithCallbackParameter = function(cb) {
+        return cb.callback !== callback;
+      };
+      // Go over each callback type in callbacks store object
+      for (var callbackType in callbacks) {
+        if (callbacks.hasOwnProperty(callbackType)) {
+          // if this is the type user asked to delete, or he asked to delete all, go ahead.
+          if (type === undefined || type === callbackType) {
+            // If user asked to delete all callbacks in this type or all types
+            if (callback === undefined) {
+                callbacks[callbackType] = [];
+              } else {
+                // Remove all matching callbacks
+                callbacks[callbackType] = callbacks[callbackType].filter(compareWithCallbackParameter);
+            }
+          }
+        }
+      }
+    },
+
+    /**
+     * Returns true if speech recognition is currently on.
+     * Returns false if speech recognition is off or annyang is paused.
+     *
+     * @return boolean true = SpeechRecognition is on and annyang is listening
+     * @method isListening
+     */
+    isListening: function() {
+      return isListening && !pauseListening;
+    },
+
+    /**
+     * Returns the instance of the browser's SpeechRecognition object used by annyang.
+     * Useful in case you want direct access to the browser's Speech Recognition engine.
+     *
+     * @returns SpeechRecognition The browser's Speech Recognizer currently used by annyang
+     * @method getSpeechRecognizer
+     */
+    getSpeechRecognizer: function() {
+      return recognition;
     }
   };
 
@@ -501,7 +596,7 @@
  * var commands = {
  *   // annyang will capture anything after a splat (*) and pass it to the function.
  *   // e.g. saying "Show me Batman and Robin" will call showFlickr('Batman and Robin');
- *   'show me *term': showFlickr,
+ *   'show me *tag': showFlickr,
  *
  *   // A named variable is a one word variable, that can fit anywhere in your command.
  *   // e.g. saying "calculate October stats" will call calculateStats('October');
@@ -512,7 +607,7 @@
  *   'say hello (to my little) friend': greeting
  * };
  *
- * var showFlickr = function(term) {
+ * var showFlickr = function(tag) {
  *   var url = 'http://api.flickr.com/services/rest/?tags='+tag;
  *   $.getJSON(url);
  * }
@@ -646,5 +741,7 @@
  *
  * Point your browser to `https://localhost:8443/demo/` to see the demo page.
  * Since it's using self-signed certificate, you might need to click *"Proceed Anyway"*.
+ *
+ * For more info, check out the [CONTRIBUTING](https://github.com/TalAter/annyang/blob/master/CONTRIBUTING.md) file
  *
  */

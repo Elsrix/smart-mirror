@@ -6,7 +6,7 @@
 body {
     background-color: black;
     color: #fff;
-    font-family: 'HelveticaNeue-UltraLight', 'Open Sans', sans-serif;
+    font-family: 'HelveticaNeue-UltraLight', 'Open Sans', 'Roboto Condensed', sans-serif;
     font-weight: 300;
     position: relative;
 }
@@ -16,7 +16,7 @@ h2,
 h3,
 h4,
 h5 {
-    font-weight: 300;
+    font-weight: 30;
 }
 
 h1 {
@@ -62,7 +62,7 @@ dt {
 }
 
 .listening, .interim-result {
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Roboto Condensed', 'HelveticaNeue-UltraLight', sans-serif;
 }
 
 .top-left {
@@ -74,7 +74,27 @@ dt {
 }
 
 .time {
-    font-size: 110px;
+    font-size: 90px;
+}
+
+.greeting {
+	font-size: 30px;
+}
+
+.containter-top-right {
+	position: absolute;
+	font-family: 'Roboto Condensed', sans-serif;
+	text-align: right;
+	top: 20px;
+	right: 20px;
+}
+
+.container-bottom-center {
+	position: absolute;
+    font-family: 'Roboto Condensed', sans-serif;
+    width: 100%;
+    text-align: center;
+    bottom: 20px;
 }
 
 .top-right {
@@ -99,7 +119,15 @@ dt {
     margin-bottom: 20px;
 }
 
+.bottom-right {
+	position: absolute;
+	text-align: center;
+	bottom: 20px;
+	right: 20px;
+}
+
 .commands {
+	font-family: 'HelveticaNeue-UltraLight', sans-serif;
     width: 450px;
     text-align: left;
     margin-left: auto;
@@ -234,13 +262,53 @@ ul.calendar {
 }
 
 .animate-grow.ng-hide-add {
-    transition: all linear 500ms;
+    transition: all linear 300ms;
 }
 
 .animate-grow.ng-hide-remove {
-    transition: all linear 500ms;
+    transition: all linear 300ms;
 }
 
 .animate-grow.ng-hide {
     max-height: 0  !important;
+}
+
+.animate-wave-box {
+	width: 100px;
+	height: 50px;
+	margin: 5px auto;
+}
+
+.animate-wave-span {
+	display: inline-block;
+	background-color: white;
+	width: 2px;
+	height: 2px;
+	animation: wave 2s linear infinite;
+}
+
+.a1 {
+  animation-delay: 0s;
+}
+.a2 {
+  animation-delay: .2s;
+}
+.a3 {
+  animation-delay: .4s;
+}
+.a4 {
+  animation-delay: .6s;
+}
+.a5 {
+  animation-delay: .8s;
+}
+
+@keyframes wave {
+  0%, 50%{
+    transform: scaleY(1);
+  }
+  25% {
+    transform: scaleY(6);
+    background-color: white;
+  }
 }

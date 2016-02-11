@@ -29,7 +29,10 @@
             annyang.start();
             if (typeof(listening) == "function") {
                 annyang.addCallback('start', function(){$rootScope.$apply(listening(true));});
-                annyang.addCallback('end', function(data){console.log("End", data)});
+                annyang.addCallback('end', function(){
+					console.log("End");	
+					$rootScope.$apply(listening(false));
+				});
             };
             if (typeof(interimResult) == "function") {
                 annyang.addCallback('interimResult', function(data){$rootScope.$apply(interimResult(data));});
