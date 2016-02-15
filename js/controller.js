@@ -1,7 +1,7 @@
 (function(angular) {
     'use strict';
 
-    function MirrorCtrl(AnnyangService, GeolocationService, WeatherService, MapService, HueService, CalendarService, $scope, $timeout, $interval) {
+    function MirrorCtrl(AnnyangService, GeolocationService, WeatherService, MapService, HueService, CalendarService, $scope, $timeout, $interval, $location) {
         var _this = this;
         var DEFAULT_COMMAND_TEXT = 'Says "Mirror" to see all commands';
 		
@@ -12,9 +12,11 @@
         $scope.user = {};
         $scope.interimResult = DEFAULT_COMMAND_TEXT;
 
-        $scope.colors=["#6ed3cf", "#9068be", "#e1e8f0", "#e62739"];
+        //$scope.colors=["#6ed3cf", "#9068be", "#e1e8f0", "#e62739"];
 
-        //Update the time
+
+		/** HOME functions **/
+        // Update the time
         function updateTime(){
             $scope.date = new Date();
         }
@@ -28,10 +30,26 @@
 			if ($scope.user.name != null) $scope.greeting += ', ' + $scope.user.name;
 		}
 
+		/*
+		* Navigate the html pages.
+		*/
+		function navigatePage(url){
+			if (url == "weather") $location.path("/"+url);
+			else if (url == null) $location.path("/");
+		}
+		/***** End of Home Page functions ******/
+		
+		
+		
+		
+		
+		
+		
 
         // Reset the command text
         var restCommand = function(){
           $scope.interimResult = DEFAULT_COMMAND_TEXT;
+		  $scope.isTalking = false;
         }
 
         _this.init = function() {
@@ -83,15 +101,36 @@
 
             // Go back to default view
             AnnyangService.addCommand('Go home', defaultView);
+			AnnyangService.addCommand('Exit', defaultView);
 
             // Hide everything and "sleep"
             AnnyangService.addCommand('Go to sleep', function() {
                 console.debug("Ok, going to sleep...");
                 $scope.focus = "sleep";
             });
-
-            // Go back to default view
-            AnnyangService.addCommand('Exit', defaultView);
+			
+            // Change name
+            AnnyangService.addCommand('My (name is)(name\'s) *name', function(name) {
+                $scope.focus = "default";
+				console.debug("Hi", name, "nice to meet you");
+                $scope.user.name = name;
+				getGreeting($scope.date.getHours());
+				
+            });
+			
+			
+			// I want weather
+            AnnyangService.addCommand('weather', function() {
+				$scope.focus = "default";
+                console.debug("weather...");
+				fetchWeather("Singapore");
+                navigatePage("weather");
+            });
+			
+            AnnyangService.addCommand('weather (in)(at) *city', function(cityName) {
+				fetchWeather(cityName);
+                navigatePage("weather");
+            });
 
             // Hide everything and "sleep"
             AnnyangService.addCommand('debug information', function() {
@@ -139,12 +178,7 @@
                 console.debug("Showing", term);
             });
 
-            // Change name
-            AnnyangService.addCommand('My (name is)(name\'s) *name', function(name) {
-                console.debug("Hi", name, "nice to meet you");
-                $scope.user.name = name;
-				getGreeting($scope.date.getHours());
-            });
+            
 
 
             // Clear log of commands
@@ -172,15 +206,21 @@
 
             var resetCommandTimeout;
             //Track when the Annyang is listening to us
-            AnnyangService.start(function(listening){
+            AnnyangService.start(
+			function(listening){
                 $scope.listening = listening;
 				console.debug("listening");
-            }, function(interimResult){
+            }, 
+			function(interimResult){
                 $scope.interimResult = interimResult;
+				$scope.isTalking = true;
                 $timeout.cancel(resetCommandTimeout);
-            }, function(result){
+				console.debug("interimResult");
+            }, 
+			function(result){
                 $scope.interimResult = result[0];
                 resetCommandTimeout = $timeout(restCommand, 5000);
+				console.debug("result");
             });
         };
 
@@ -196,6 +236,23 @@
         };
 
         _this.init();
+		
+		fetchWeather("Singapore");
+		
+		/** WEATHER functions **/
+		
+		function fetchWeather(cityName) {
+  	    	WeatherService.getWeather(cityName).then(function(data){
+  	      		$scope.place = data;
+				$scope.todayWeatherIcon = WeatherService.setWeatherIcon(data.item.condition.code);
+				$scope.day1Icon = WeatherService.setWeatherIcon(data.item.forecast[1].code);
+				$scope.day2Icon = WeatherService.setWeatherIcon(data.item.forecast[2].code);
+				$scope.day3Icon = WeatherService.setWeatherIcon(data.item.forecast[3].code);
+				$scope.day4Icon = WeatherService.setWeatherIcon(data.item.forecast[4].code);
+  	    	});
+		}
+		
+		/** End of WEATHER functions **/
     }
 
     angular.module('SmartMirror')

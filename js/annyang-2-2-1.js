@@ -181,7 +181,7 @@
           } else {
             //root.annyang.start();
 			/* Henry: delay before the annyang resumes automatically. */
-			setTimeout(root.annyang.start, 3000);
+			setTimeout(root.annyang.start, 1000);
           }
         }
       };

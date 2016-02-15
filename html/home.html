@@ -1,43 +1,17 @@
-<!DOCTYPE html>
-<html ng-app="SmartMirror">
-<body ng-controller="MirrorCtrl">
-
-<div class="containter-top-right">
-	<div class="time animated flipInX">{{date | date : 'hh:mm'}}</div>
-	<div class="greeting grey animated flipInX">{{greeting}}</div>
-</div>
-
-<div class="container-bottom-center">
-	
-	<div class="animate-wave-box" ng-show="listening">
-		<span class="animate-wave-span a5"/>
-		<span class="animate-wave-span a1"/>
-		<span class="animate-wave-span a3"/>
-		<span class="animate-wave-span a2"/>
-		<span class="animate-wave-span a1"/>
-		<span class="animate-wave-span a2"/>
-		<span class="animate-wave-span a1"/>
-		<span class="animate-wave-span a4"/>
-		<span class="animate-wave-span a5"/>
+<div id="weatherPlace" class="containter-top-right">
+	<div class="normal grey animated flipInX">
+		<i style="font-size: 1em; color: grey; " class="{{todayWeatherIcon}}"></i> 
+		<span style="font-size: .5em;">{{ place.item.condition.code }}°C</span>
 	</div>
-	
-	<div class="interim-result animated bounceIn" ng-bind="interimResult"></div>
-	
-    <!-- Command list -->
-    <div class="commands animate-grow" ng-show="focus == 'commands'">
-		
-      <dl>
-		<dt class="grey">Available Commands</dt>
-        <dd class="light-grey">My name is ...</dd>
-        <dd class="light-grey">Weather in ...</dd>
-        <dd class="light-grey">Map of ....</dd>
-        <dd class="light-grey">Direction to ...</dd>
-        <dd class="light-grey">Exit</dd>
-      </dl>
-    </div>
-	
-	
+	<div class="smaller-by-2x grey animated flipInX">SINGAPORE</div>
 </div>
-	
-</body>
-</html>
+<div id="dateGreeting" class="container-middle-center">
+	<div class="larger-by-4x animated flipInX">{{date | date : 'hh:mm'}}</div>
+	<div class="normal grey animated flipInX">{{greeting}}</div>
+</div>
+<script>
+    $( document ).ready(function() {
+		$('#dateGreeting').draggable();
+		$('#weatherPlace').draggable();
+    });
+</script>
