@@ -1,9 +1,9 @@
 (function(angular) {
     'use strict';
 
-    function MirrorCtrl(AnnyangService, GeolocationService, WeatherService, MapService, HueService, CalendarService, $scope, $timeout, $interval, $location) {
+    function MirrorCtrl(AnnyangService, WeatherService, $scope, $timeout, $interval, $location) {
         var _this = this;
-        var DEFAULT_COMMAND_TEXT = 'Says "Mirror" to see all commands';
+		var DEFAULT_COMMAND_TEXT = 'Says "Mirror" to see all commands';
 		
 		
 		$scope.listening = false;
@@ -48,8 +48,8 @@
 
         // Reset the command text
         var restCommand = function(){
-          $scope.interimResult = DEFAULT_COMMAND_TEXT;
-		  $scope.isTalking = false;
+          $scope.finalResult = DEFAULT_COMMAND_TEXT;
+		  $scope.interimResult = '';
         }
 
         _this.init = function() {
@@ -57,7 +57,7 @@
             updateTime();
 			getGreeting($scope.date.getHours());
 			
-            $scope.map = MapService.generateMap("Seattle,WA");
+            // $scope.map = MapService.generateMap("Seattle,WA");
             _this.clearResults();
             restCommand();
 
@@ -147,30 +147,30 @@
             // Hide everything and "sleep"
             AnnyangService.addCommand('Show (me a) map of *location', function(location) {
                 console.debug("Getting map of", location);
-                $scope.map = MapService.generateMap(location);
-                $scope.focus = "map";
+                //$scope.map = MapService.generateMap(location);
+                //$scope.focus = "map";
             });
 
             // Zoom in map
             AnnyangService.addCommand('(map) zoom in', function() {
                 console.debug("Zoooooooom!!!");
-                $scope.map = MapService.zoomIn();
+                //$scope.map = MapService.zoomIn();
             });
 
             AnnyangService.addCommand('(map) zoom out', function() {
                 console.debug("Moooooooooz!!!");
-                $scope.map = MapService.zoomOut();
+                //$scope.map = MapService.zoomOut();
             });
 
             AnnyangService.addCommand('(map) zoom (to) *value', function(value) {
                 console.debug("Moooop!!!", value);
-                $scope.map = MapService.zoomTo(value);
+                //$scope.map = MapService.zoomTo(value);
             });
 
             AnnyangService.addCommand('(map) reset zoom', function() {
                 console.debug("Zoooommmmmzzz00000!!!");
-                $scope.map = MapService.reset();
-                $scope.focus = "map";
+                //$scope.map = MapService.reset();
+                //$scope.focus = "map";
             });
 
             // Search images
@@ -209,18 +209,37 @@
             AnnyangService.start(
 			function(listening){
                 $scope.listening = listening;
-				console.debug("listening");
+				//console.debug("listening");
             }, 
 			function(interimResult){
-                $scope.interimResult = interimResult;
+				console.debug("interimResult: " + interimResult);
 				$scope.isTalking = true;
+				// $scope.interimResult = interimResult;
+				// if ($scope.finalResult == '') $scope.finalResult =  interimResult;
+				// if ($scope.finalResult != interimResult) {
+				//
+				// 	$scope.interimResult = interimResult.replace($scope.finalResult,'');
+				// 	$scope.finalResult = $scope.finalResult.replace(interimResult,'');
+				// 	//$scope.finalResult = interimResult;
+				//
+				// 	if ($scope.interimResult == $scope.finalResult) $scope.interimResult='';
+				// }
+				var res = interimResult.split(" ");
+				$scope.interimResult = res[res.length-1];
+				$scope.finalResult = interimResult.replace($scope.interimResult,''); 
+				
+				console.debug("controller interimResult:" + $scope.interimResult);
+				console.debug("controller finalResult:" + $scope.finalResult);
                 $timeout.cancel(resetCommandTimeout);
-				console.debug("interimResult");
+				
             }, 
 			function(result){
-                $scope.interimResult = result[0];
+				console.debug("controller result");
+				$scope.isTalking = false;
+                //$scope.interimResult = result[0];
+				$scope.finalResult = result[0];
+				$scope.interimResult = '';
                 resetCommandTimeout = $timeout(restCommand, 5000);
-				console.debug("result");
             });
         };
 

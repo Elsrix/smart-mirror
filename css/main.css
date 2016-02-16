@@ -58,7 +58,8 @@ dt {
 .otherDayTextMin { font-size: 1em; text-align: left; color: grey !important; }
 .otherDayTemp { font-size: 1.5em; text-align: left; color: grey !important; }
 .otherDayTempMin { font-size: 1em; text-align: left; color: grey !important; }
-
+.final { color: white; padding-right: 3px; }
+.interim { color: gray; }
 
 .listening, .interim-result {
 	text-align: center;
