@@ -19,6 +19,7 @@
         // Update the time
         function updateTime(){
             $scope.date = new Date();
+			getGreeting($scope.date.getHours());
         }
 		
 		//Greeting based on the time of the day
@@ -34,7 +35,8 @@
 		* Navigate the html pages.
 		*/
 		function navigatePage(url){
-			if (url == "weather") $location.path("/"+url);
+			if (url == "home") $location.path("/");
+			else if (url == "weather") $location.path("/"+url);
 			else if (url == null) $location.path("/");
 		}
 		/***** End of Home Page functions ******/
@@ -51,192 +53,160 @@
           $scope.finalResult = DEFAULT_COMMAND_TEXT;
 		  $scope.interimResult = '';
         }
+		
+        var defaultView = function() {
+            $scope.focus = "default";
+			navigatePage("home");
+        }
 
         _this.init = function() {
             var tick = $interval(updateTime, 1000);
             updateTime();
-			getGreeting($scope.date.getHours());
-			
-            // $scope.map = MapService.generateMap("Seattle,WA");
+			fetchWeather("Singapore");
+
             _this.clearResults();
             restCommand();
 
-            // var refreshMirrorData = function() {
-            //     //Get our location and then get the weather for our location
-            //     GeolocationService.getLocation({enableHighAccuracy: true}).then(function(geoposition){
-            //         console.log("Geoposition", geoposition);
-            //         WeatherService.init(geoposition).then(function(){
-            //             $scope.currentForcast = WeatherService.currentForcast();
-            //             $scope.weeklyForcast = WeatherService.weeklyForcast();
-            //             console.log("Current", $scope.currentForcast);
-            //             console.log("Weekly", $scope.weeklyForcast);
-            //         });
-            //     });
-            //
-            //     var promise = CalendarService.renderAppointments();
-            //     promise.then(function(response) {
-            //         $scope.calendar = CalendarService.getFutureEvents();
-            //     }, function(error) {
-            //         console.log(error);
-            //     });
-            // };
-
-            // $timeout(refreshMirrorData(), 3600000);
-
-            //Initiate Hue communication
-            //HueService.init();
-
-            var defaultView = function() {
-                console.debug("Ok, going to default view...");
-                $scope.focus = "default";
-            }
-
             // List commands
-            AnnyangService.addCommand('Mirror', function() {
-                console.debug("Here is a list of commands...");
-                console.log(AnnyangService.commands);
-                $scope.focus = "commands";
-				//DEFAULT_COMMAND_TEXT = 'Says your "command" when you see the bars moving';
-            });
-
-            // Go back to default view
-            AnnyangService.addCommand('Go home', defaultView);
-			AnnyangService.addCommand('Exit', defaultView);
-
-            // Hide everything and "sleep"
-            AnnyangService.addCommand('Go to sleep', function() {
-                console.debug("Ok, going to sleep...");
-                $scope.focus = "sleep";
-            });
+			AnnyangService.addCommand('Mirror (*args)', function(args) {
+				if (args == undefined) $scope.finalResult = "Mirror";
+				$scope.focus = "commands";
+			});
 			
-            // Change name
+			AnnyangService.addCommand('Go home', defaultView);
+			AnnyangService.addCommand('Exit', defaultView);
             AnnyangService.addCommand('My (name is)(name\'s) *name', function(name) {
                 $scope.focus = "default";
-				console.debug("Hi", name, "nice to meet you");
                 $scope.user.name = name;
 				getGreeting($scope.date.getHours());
-				
             });
-			
-			
-			// I want weather
             AnnyangService.addCommand('weather', function() {
 				$scope.focus = "default";
-                console.debug("weather...");
 				fetchWeather("Singapore");
                 navigatePage("weather");
             });
-			
             AnnyangService.addCommand('weather (in)(at) *city', function(cityName) {
 				fetchWeather(cityName);
                 navigatePage("weather");
             });
 
-            // Hide everything and "sleep"
-            AnnyangService.addCommand('debug information', function() {
-                console.debug("Boop Boop. Showing debug info...");
-                $scope.debug = true;
-            });
+			
+			
+            // AnnyangService.addCommand('Mirror', function() {
+            //     console.debug("Here is a list of commands...");
+            //     console.log(AnnyangService.commands);
+            //     $scope.focus = "commands";
+            // });
+
+            // Go back to default view
+            
 
             // Hide everything and "sleep"
-            AnnyangService.addCommand('Show map', function() {
-                console.debug("Going on an adventure?");
-                $scope.focus = "map";
-            });
+            // AnnyangService.addCommand('Go to sleep', function() {
+            //     console.debug("Ok, going to sleep...");
+            //     $scope.focus = "sleep";
+            // });
+			
+            // Change name
+            
+			
+			
+			// I want weather
+            
 
             // Hide everything and "sleep"
-            AnnyangService.addCommand('Show (me a) map of *location', function(location) {
-                console.debug("Getting map of", location);
-                //$scope.map = MapService.generateMap(location);
-                //$scope.focus = "map";
-            });
+            // AnnyangService.addCommand('debug information', function() {
+            //     console.debug("Boop Boop. Showing debug info...");
+            //     $scope.debug = true;
+            // });
+
+            // Hide everything and "sleep"
+            // AnnyangService.addCommand('Show map', function() {
+            //     console.debug("Going on an adventure?");
+            //     $scope.focus = "map";
+            // });
+
+            // Hide everything and "sleep"
+            // AnnyangService.addCommand('Show (me a) map of *location', function(location) {
+            //     console.debug("Getting map of", location);
+            //     $scope.map = MapService.generateMap(location);
+            //     $scope.focus = "map";
+            // });
 
             // Zoom in map
-            AnnyangService.addCommand('(map) zoom in', function() {
-                console.debug("Zoooooooom!!!");
-                //$scope.map = MapService.zoomIn();
-            });
+            // AnnyangService.addCommand('(map) zoom in', function() {
+            //     console.debug("Zoooooooom!!!");
+            //     $scope.map = MapService.zoomIn();
+            // });
 
-            AnnyangService.addCommand('(map) zoom out', function() {
-                console.debug("Moooooooooz!!!");
-                //$scope.map = MapService.zoomOut();
-            });
+            // AnnyangService.addCommand('(map) zoom out', function() {
+            //     console.debug("Moooooooooz!!!");
+            //     $scope.map = MapService.zoomOut();
+            // });
 
-            AnnyangService.addCommand('(map) zoom (to) *value', function(value) {
-                console.debug("Moooop!!!", value);
-                //$scope.map = MapService.zoomTo(value);
-            });
+            // AnnyangService.addCommand('(map) zoom (to) *value', function(value) {
+            //     console.debug("Moooop!!!", value);
+            //     //$scope.map = MapService.zoomTo(value);
+            // });
 
-            AnnyangService.addCommand('(map) reset zoom', function() {
-                console.debug("Zoooommmmmzzz00000!!!");
-                //$scope.map = MapService.reset();
-                //$scope.focus = "map";
-            });
+            // AnnyangService.addCommand('(map) reset zoom', function() {
+            //     console.debug("Zoooommmmmzzz00000!!!");
+            //     $scope.map = MapService.reset();
+            //     $scope.focus = "map";
+            // });
 
             // Search images
-            AnnyangService.addCommand('Show me *term', function(term) {
-                console.debug("Showing", term);
-            });
+            // AnnyangService.addCommand('Show me *term', function(term) {
+            //     console.debug("Showing", term);
+            // });
 
             
 
 
             // Clear log of commands
-            AnnyangService.addCommand('Clear results', function(task) {
-                 console.debug("Clearing results");
-                 _this.clearResults()
-            });
-
-            // Check the time
-            AnnyangService.addCommand('what time is it', function(task) {
-                 console.debug("It is", moment().format('h:mm:ss a'));
-                 _this.clearResults();
-            });
-
-            // Turn lights off
-            // AnnyangService.addCommand('(turn) (the) :state (the) light(s) *action', function(state, action) {
-            //     HueService.performUpdate(state + " " + action);
+            // AnnyangService.addCommand('Clear results', function(task) {
+            //      console.debug("Clearing results");
+            //      _this.clearResults()
             // });
 
+            // Check the time
+            // AnnyangService.addCommand('what time is it', function(task) {
+           //       console.debug("It is", moment().format('h:mm:ss a'));
+           //       _this.clearResults();
+           //  });
+
+
             // Fallback for all commands
-            AnnyangService.addCommand('*allSpeech', function(allSpeech) {
-                console.debug(allSpeech);
-                _this.addResult(allSpeech);
-            });
+            // AnnyangService.addCommand('*allSpeech', function(allSpeech) {
+            //     console.debug(allSpeech);
+            //     _this.addResult(allSpeech);
+            // });
+			
 
             var resetCommandTimeout;
             //Track when the Annyang is listening to us
             AnnyangService.start(
 			function(listening){
                 $scope.listening = listening;
-				//console.debug("listening");
             }, 
 			function(interimResult){
-				console.debug("interimResult: " + interimResult);
 				$scope.isTalking = true;
-				// $scope.interimResult = interimResult;
-				// if ($scope.finalResult == '') $scope.finalResult =  interimResult;
-				// if ($scope.finalResult != interimResult) {
-				//
-				// 	$scope.interimResult = interimResult.replace($scope.finalResult,'');
-				// 	$scope.finalResult = $scope.finalResult.replace(interimResult,'');
-				// 	//$scope.finalResult = interimResult;
-				//
-				// 	if ($scope.interimResult == $scope.finalResult) $scope.interimResult='';
-				// }
-				var res = interimResult.split(" ");
-				$scope.interimResult = res[res.length-1];
-				$scope.finalResult = interimResult.replace($scope.interimResult,''); 
+
+				$scope.interimResult = interimResult;
+				$scope.finalResult = ''; 
 				
-				console.debug("controller interimResult:" + $scope.interimResult);
-				console.debug("controller finalResult:" + $scope.finalResult);
+				// var res = interimResult.split(" ");
+				// $scope.interimResult = res[res.length-1];
+				// $scope.finalResult = interimResult.replace($scope.interimResult,'');
+				
+				// console.debug("interimResult: " + interimResult);
+				// console.debug("controller interimResult:" + $scope.interimResult);
+				// console.debug("controller finalResult:" + $scope.finalResult);
                 $timeout.cancel(resetCommandTimeout);
 				
             }, 
 			function(result){
-				console.debug("controller result");
 				$scope.isTalking = false;
-                //$scope.interimResult = result[0];
 				$scope.finalResult = result[0];
 				$scope.interimResult = '';
                 resetCommandTimeout = $timeout(restCommand, 5000);
@@ -256,7 +226,7 @@
 
         _this.init();
 		
-		fetchWeather("Singapore");
+		
 		
 		/** WEATHER functions **/
 		

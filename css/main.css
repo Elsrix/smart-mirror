@@ -30,6 +30,11 @@ dt {
     color: #999;
 }
 
+.disabled {
+ visibility: hidden;
+ cursor: default;
+}
+
 .larger-by-4x {
 	font-size: 8em;
 }

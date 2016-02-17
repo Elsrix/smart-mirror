@@ -179,9 +179,9 @@
           if (timeSinceLastStart < 1000) {
             setTimeout(root.annyang.start, 1000-timeSinceLastStart);
           } else {
-            //root.annyang.start();
+            root.annyang.start();
 			/* Henry: delay before the annyang resumes automatically. */
-			setTimeout(root.annyang.start, 1000);
+			//setTimeout(root.annyang.start, 1000);
           }
         }
       };
@@ -205,13 +205,13 @@
 		/* Henry: add interimResult here. */
         var SpeechRecognitionResult = event.results[event.resultIndex];
         var results = [];
-        var finalResults = false
+        var finalResults = false;
         for (var k = 0; k<SpeechRecognitionResult.length; k++) {
           if(SpeechRecognitionResult.isFinal){
             finalResults = true;
             results[k] = SpeechRecognitionResult[k].transcript;
           }
-          else if(k == 0){
+          else if(k == 0){ // usually, the SpeechRecognitionResult has only a record; unless it is final
             root.console.log('Interim: %c' + SpeechRecognitionResult[k].transcript, debugStyle);
             invokeCallbacks(callbacks.interimResult, SpeechRecognitionResult[k].transcript, null);
           }
@@ -225,9 +225,12 @@
 		
         var commandText;
         // go over each of the 5 results and alternative results received (we've set maxAlternatives to 5 above)
+		//root.console.log('results xxx : %c' + results, debugStyle);
         for (var i = 0; i<results.length; i++) {
           // the text recognized
           commandText = results[i].trim();
+		  //root.console.log('commandText: %c' + commandText, debugStyle);
+		  
           if (debugState) {
             root.console.log('Speech recognized: %c'+commandText, debugStyle);
           }
