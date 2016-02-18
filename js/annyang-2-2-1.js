@@ -4,6 +4,8 @@
 //! license : MIT
 //! https://www.TalAter.com/annyang/
 
+
+// Modified to display InterimResult
 (function (undefined) {
   "use strict";
 
@@ -36,8 +38,10 @@
 
   var commandsList = [];
   var recognition;
-  /* Henry: add interimResult[]
+  /* Henry: add interimResult[];
+  original:
   var callbacks = { start: [], error: [], end: [], result: [], resultMatch: [], resultNoMatch: [], errorNetwork: [], errorPermissionBlocked: [], errorPermissionDenied: [] };
+  end:
   */
   var callbacks = { start: [], error: [], end: [], result: [], resultMatch: [], resultNoMatch: [], 
 	  interimResult: [],
@@ -138,7 +142,9 @@
       // In HTTP,  turn on  continuous mode for much slower results, but no repeating security notices
       recognition.continuous = root.location.protocol === 'http:';
 
-	  /* Henry: Add this for interimResult to improve the performance */
+	  /* Henry: 
+	  Add this for interimResult to improve the performance 
+	  */
 	  recognition.interimResults = true;
 	  
       // Sets the language to the default 'en-US'. This can be changed with annyang.setLanguage()
@@ -180,8 +186,6 @@
             setTimeout(root.annyang.start, 1000-timeSinceLastStart);
           } else {
             root.annyang.start();
-			/* Henry: delay before the annyang resumes automatically. */
-			//setTimeout(root.annyang.start, 1000);
           }
         }
       };
@@ -194,15 +198,18 @@
           return false;
         }
 
-        // Map the results to an array
-        // var SpeechRecognitionResult = event.results[event.resultIndex];
-        // var results = [];
-        // for (var k = 0; k<SpeechRecognitionResult.length; k++) {
-        //   results[k] = SpeechRecognitionResult[k].transcript;
-        // }
-        //
-        // invokeCallbacks(callbacks.result, results);
-		/* Henry: add interimResult here. */
+		/* Henry: add interimResult here
+        original:
+		// Map the results to an array
+        var SpeechRecognitionResult = event.results[event.resultIndex];
+        var results = [];
+        for (var k = 0; k<SpeechRecognitionResult.length; k++) {
+          results[k] = SpeechRecognitionResult[k].transcript;
+        }
+
+        invokeCallbacks(callbacks.result, results);
+		end:
+		*/
         var SpeechRecognitionResult = event.results[event.resultIndex];
         var results = [];
         var finalResults = false;
@@ -212,7 +219,7 @@
             results[k] = SpeechRecognitionResult[k].transcript;
           }
           else if(k == 0){ // usually, the SpeechRecognitionResult has only a record; unless it is final
-            root.console.log('Interim: %c' + SpeechRecognitionResult[k].transcript, debugStyle);
+            //root.console.log('Interim: %c' + SpeechRecognitionResult[k].transcript, debugStyle);
             invokeCallbacks(callbacks.interimResult, SpeechRecognitionResult[k].transcript, null);
           }
         }
@@ -229,14 +236,14 @@
         for (var i = 0; i<results.length; i++) {
           // the text recognized
           commandText = results[i].trim();
-		  //root.console.log('commandText: %c' + commandText, debugStyle);
 		  
           if (debugState) {
-            root.console.log('Speech recognized: %c'+commandText, debugStyle);
+            //root.console.log('Speech recognized: %c'+commandText, debugStyle);
           }
 
           // try and match recognized text to one of the commands on the list
           for (var j = 0, l = commandsList.length; j < l; j++) {
+			  
             var currentCommand = commandsList[j];
             var result = currentCommand.command.exec(commandText);
             if (result) {
@@ -251,7 +258,7 @@
               currentCommand.callback.apply(this, parameters);
               invokeCallbacks(callbacks.resultMatch, commandText, currentCommand.originalPhrase, results);
               return true;
-            }
+            }				
           }
         }
         invokeCallbacks(callbacks.resultNoMatch, results);
