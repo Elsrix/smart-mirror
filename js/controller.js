@@ -1,7 +1,7 @@
 (function(angular) {
     'use strict';
 
-    function MirrorCtrl(AnnyangService, WeatherService, MapService, $scope, $timeout, $interval, $location) {
+    function MirrorCtrl(AnnyangService, WeatherService, MapService, YoutubeService, $scope, $timeout, $interval, $location) {
         var _this = this;
 		var DEFAULT_COMMAND_TEXT = 'Says "Mirror" to see all commands';
 		
@@ -15,6 +15,7 @@
 			if (url == "home") $location.path("/");
 			else if (url == "weather") $location.path("/"+url);
 			else if (url == "map") $location.path("/"+url);
+			else if (url == "youtube") $location.path("/"+url);
 			else if (url == null) $location.path("/");
 		}
 
@@ -55,6 +56,7 @@
             });
 			
 			
+			/* Annyang voice command area for weather */
             AnnyangService.addCommand('weather', function() {
  				$scope.focus = "default";
  				fetchWeather(config.location.name);
@@ -66,6 +68,7 @@
             });
 			
 			
+			/* Annyang voice command area for map */
             AnnyangService.addCommand('map (of) *place', function(place) {
 				$scope.focus = "default";
  				$scope.map = MapService.generateMap(place);
@@ -80,6 +83,16 @@
  				$scope.map = MapService.zoomOut();
             });
 			
+			
+			/* Annyang voice command area for youtube */
+			AnnyangService.addCommand('show me (a video)(of)(about) *query', function(query){
+				YoutubeService.searchYouTube(query).then(function(results){
+					$scope.focus = "default";
+					$scope.videoId = results.data.items[0].id.videoId;
+					$scope.playerVars = { controls: 0, autoplay: 1 };
+					navigatePage("youtube");
+				});
+			});
 			
 
 			//Track when the Annyang is listening to us

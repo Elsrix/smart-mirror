@@ -3,8 +3,8 @@
 
     function MapService() {
         var map = {};
-        map.center = "Singapore"; //default map locaiton
-        map.zoom = 13; //default zoom is 14
+        map.center = config.location.name; //default map locaiton
+        map.zoom = config.location.zoom; //default zoom is 14
 
         map.generateMap = function(targetCenter, targetZoom) {
             if (targetCenter === undefined) {
