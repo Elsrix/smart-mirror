@@ -1,7 +1,7 @@
 (function(angular) {
     'use strict';
 
-    function MirrorCtrl(AnnyangService, WeatherService, $scope, $timeout, $interval, $location) {
+    function MirrorCtrl(AnnyangService, WeatherService, MapService, $scope, $timeout, $interval, $location) {
         var _this = this;
 		var DEFAULT_COMMAND_TEXT = 'Says "Mirror" to see all commands';
 		
@@ -14,6 +14,7 @@
 		function navigatePage(url){
 			if (url == "home") $location.path("/");
 			else if (url == "weather") $location.path("/"+url);
+			else if (url == "map") $location.path("/"+url);
 			else if (url == null) $location.path("/");
 		}
 
@@ -34,7 +35,7 @@
          _this.init = function() {
             var tick = $interval(updateTime, 1000);
             updateTime();
- 			fetchWeather("Singapore");
+ 			fetchWeather(config.location.name);
             restCommand();
 
              // List commands
@@ -56,13 +57,29 @@
 			
             AnnyangService.addCommand('weather', function() {
  				$scope.focus = "default";
- 				fetchWeather("Singapore");
-                 navigatePage("weather");
+ 				fetchWeather(config.location.name);
+                navigatePage("weather");
             });
             AnnyangService.addCommand('weather (in)(at) *city', function(cityName) {
  				fetchWeather(cityName);
-                 navigatePage("weather");
+                navigatePage("weather");
             });
+			
+			
+            AnnyangService.addCommand('map (of) *place', function(place) {
+				$scope.focus = "default";
+ 				$scope.map = MapService.generateMap(place);
+                navigatePage("map");
+            });
+            AnnyangService.addCommand('zoom in', function() {
+				$scope.focus = "default";
+ 				$scope.map = MapService.zoomIn();
+            });
+            AnnyangService.addCommand('zoom out', function() {
+				$scope.focus = "default";
+ 				$scope.map = MapService.zoomOut();
+            });
+			
 			
 
 			//Track when the Annyang is listening to us

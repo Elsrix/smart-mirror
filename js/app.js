@@ -11,6 +11,9 @@
 			.when('/weather', {
 				templateUrl: 'html/weather.html'
 			})
+			.when('/map', {
+				templateUrl: 'html/map.html'
+			})
 			.otherwise({
 				redirectTo: '/'
 			});
