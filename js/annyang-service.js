@@ -30,6 +30,7 @@
             annyang.addCommands(service.commands);
             annyang.debug(true);
             annyang.start();
+			
             if (typeof(listening) == "function") {
                 annyang.addCallback('start', function(){
 					$rootScope.$apply(listening(true));
@@ -40,6 +41,7 @@
             };
             if (typeof(interimResult) == "function") {
                 annyang.addCallback('interimResult', function(data){
+					console.debug("interimResult: " + data);
 					$rootScope.$apply(interimResult(data));
 				});
             };

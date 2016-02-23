@@ -21,6 +21,7 @@
 
         // Reset the command text
         var restCommand = function(){
+		  $scope.isTalking = false;
           $scope.finalResult = DEFAULT_COMMAND_TEXT;
 		  $scope.interimResult = '';
         }
@@ -105,17 +106,19 @@
  			function(interimResult){
  				$scope.isTalking = true;
  				$scope.interimResult = interimResult;
- 				$scope.finalResult = ''; 
+ 				$scope.finalResult = '';
 				$timeout.cancel(resetCommandTimeout);
+				resetCommandTimeout = $timeout(restCommand, 2000);
+				
              },
  			function(result){
- 				$scope.isTalking = false;
+ 				// $scope.isTalking = false;
  				$scope.finalResult = '\"'+ result[0] + '\" is invalid command.';
  				$scope.interimResult = '';
 				resetCommandTimeout = $timeout(restCommand, 5000);
              },
  			function(resultMatch){
- 				$scope.isTalking = false;
+ 				// $scope.isTalking = false;
  				$scope.finalResult = resultMatch;
 				resetCommandTimeout = $timeout(restCommand, 5000);
              });
