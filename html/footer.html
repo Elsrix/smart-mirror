@@ -1,4 +1,10 @@
-<div ng-show="listening">
+<div ng-show="listening && awaken">
+	
+	<div class="interim-result smaller-by-2x">
+		<span class="final" ng-bind="finalResult"></span>
+		<span class="interim" ng-bind="interimResult"></span>
+	</div>
+
 	<div class="animate-wave-box" ng-class="{'disabled': isTalking}">
 		<span class="animate-wave-span a5"/>
 		<span class="animate-wave-span a1"/>
@@ -10,12 +16,7 @@
 		<span class="animate-wave-span a4"/>
 		<span class="animate-wave-span a5"/>
 	</div>
-
-	<div class="interim-result smaller-by-2x">
-		<span class="final" ng-bind="finalResult"></span>
-		<span class="interim" ng-bind="interimResult"></span>
-	</div>
-
+	
 	<div class="commands smaller-by-2x animate-grow" ng-show="focus == 'commands'">
 	  <dl>
 		<dt class="grey">Available Commands</dt>

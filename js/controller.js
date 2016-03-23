@@ -3,9 +3,10 @@
 
     function MirrorCtrl(AnnyangService, WeatherService, MapService, YoutubeService, $scope, $timeout, $interval, $location) {
         var _this = this;
-		var DEFAULT_COMMAND_TEXT = 'Says "Mirror" to see all commands';
+		var DEFAULT_COMMAND_TEXT = '';
 		
 		$scope.listening = false;
+		$scope.awaken = false;
         $scope.focus = "default";
         $scope.user = {};
         $scope.interimResult = DEFAULT_COMMAND_TEXT;
@@ -43,6 +44,17 @@
              // List commands
  			AnnyangService.addCommand('Mirror (*args)', function(args) {
  				if (args == undefined) $scope.finalResult = "Mirror";
+				$scope.awaken = true;
+				defaultView();
+ 			});
+			
+ 			AnnyangService.addCommand('Sleep', function(args) {
+ 				if (args == undefined) $scope.finalResult = "Sleep";
+				defaultView();
+				$scope.awaken = false;
+ 			});
+			
+ 			AnnyangService.addCommand('Show me the commands', function() {
  				$scope.focus = "commands";
  			});
 			
@@ -53,7 +65,7 @@
 			AnnyangService.addCommand('My (name is)(name\'s) *name', function(name) {
                  $scope.focus = "default";
                  $scope.user.name = name;
- 				getGreeting($scope.date.getHours());
+ 				 getGreeting($scope.date.getHours());
             });
 			
 			
@@ -64,40 +76,48 @@
                 navigatePage("weather");
             });
             AnnyangService.addCommand('weather (in)(at) *city', function(cityName) {
- 				fetchWeather(cityName);
-                navigatePage("weather");
+ 				if (cityName != '') {
+					fetchWeather(cityName);
+                	navigatePage("weather");
+				}
             });
 			
 			
 			/* Annyang voice command area for map */
             AnnyangService.addCommand('map (of) *place', function(place) {
-				$scope.focus = "default";
- 				$scope.map = MapService.generateMap(place);
-                navigatePage("map");
+				if (place != '') {
+					$scope.focus = "default";
+ 					$scope.map = MapService.generateMap(place);
+                	navigatePage("map");
+				}
+	            AnnyangService.addCommand('larger', function() {
+					$scope.focus = "default";
+	 				$scope.map = MapService.zoomIn();
+	            });
+	            AnnyangService.addCommand('smaller', function() {
+					$scope.focus = "default";
+	 				$scope.map = MapService.zoomOut();
+	            });
             });
-            AnnyangService.addCommand('zoom in', function() {
-				$scope.focus = "default";
- 				$scope.map = MapService.zoomIn();
-            });
-            AnnyangService.addCommand('zoom out', function() {
-				$scope.focus = "default";
- 				$scope.map = MapService.zoomOut();
-            });
+            
 			
 			
 			/* Annyang voice command area for youtube */
-			AnnyangService.addCommand('show me (a video)(of)(about) *query', function(query){
-				YoutubeService.searchYouTube(query).then(function(results){
-					$scope.focus = "default";
-					$scope.videoId = results.data.items[0].id.videoId;
-					$scope.playerVars = { controls: 0, autoplay: 1 };
-					navigatePage("youtube");
-				});
+			AnnyangService.addCommand('show me (a) video (of) (about) *query', function(query){
+				if (query != '') {
+					YoutubeService.searchYouTube(query).then(function(results){
+						$scope.focus = "default";
+						$scope.videoId = results.data.items[0].id.videoId;
+						$scope.playerVars = { controls: 0, autoplay: 1 };
+						navigatePage("youtube");
+					});
+				}
 			});
 			
 
 			//Track when the Annyang is listening to us
             var resetCommandTimeout;
+			var resetResultTimeout;
              
             AnnyangService.start(
  			function(listening){
@@ -106,21 +126,27 @@
  			function(interimResult){
  				$scope.isTalking = true;
  				$scope.interimResult = interimResult;
- 				$scope.finalResult = '';
+ 				//$scope.finalResult = '';
 				$timeout.cancel(resetCommandTimeout);
 				resetCommandTimeout = $timeout(restCommand, 2000);
 				
              },
  			function(result){
  				// $scope.isTalking = false;
- 				$scope.finalResult = '\"'+ result[0] + '\" is invalid command.';
- 				$scope.interimResult = '';
-				resetCommandTimeout = $timeout(restCommand, 5000);
+				console.log('result at controller: ' + result);
+ 				//$scope.finalResult = '\"'+ result[0] + '\" is invalid command.';
+ 				$scope.finalResult += result[0];
+				$scope.interimResult = '';
+				$timeout.cancel(resetCommandTimeout);
+				resetResultTimeout = $timeout(restCommand, 7000);
              },
  			function(resultMatch){
  				// $scope.isTalking = false;
+				console.log('resultMatch: ' + resultMatch);
  				$scope.finalResult = resultMatch;
-				resetCommandTimeout = $timeout(restCommand, 5000);
+				$timeout.cancel(resetCommandTimeout);
+				$timeout.cancel(resetResultTimeout);
+				resetResultTimeout = $timeout(restCommand, 1000);
              });
          };
 		 

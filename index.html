@@ -34,10 +34,10 @@
   
   <body ng-controller="MirrorCtrl">
 		
-	<div class="content-wrapper" ng-view>
+	<div class="content-wrapper" ng-view ng-show="awaken">
 	</div>
 	
-	<div class="footer">
+	<div class="footer" ng-show="awaken">
 		<div footer></div>
 	</div>
 	
