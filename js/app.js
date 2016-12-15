@@ -1,7 +1,7 @@
 (function(angular) {
     'use strict';
 
-    angular.module('SmartMirror', ['ngAnimate','ngRoute'])
+    angular.module('SmartMirror', ['ngAnimate','ngRoute','youtube-embed'])
 	.config( 
 		['$routeProvider', function($routeProvider) {
 		$routeProvider
@@ -10,6 +10,12 @@
 			})
 			.when('/weather', {
 				templateUrl: 'html/weather.html'
+			})
+			.when('/map', {
+				templateUrl: 'html/map.html'
+			})
+			.when('/youtube', {
+				templateUrl: 'html/youtube.html'
 			})
 			.otherwise({
 				redirectTo: '/'
