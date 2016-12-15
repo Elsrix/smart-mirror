@@ -38,6 +38,8 @@
          _this.init = function() {
             var tick = $interval(updateTime, 1000);
             updateTime();
+			
+			fetchSgWeather(config.location.name);
  			fetchWeather(config.location.name);
             restCommand();
 
@@ -177,6 +179,7 @@
 		
 		/******* WEATHER functions *******/
 		function fetchWeather(cityName) {
+			if (cityName == 'Singapore') cityName = 'Singapore, Singapore'; // bug in Yahoo API
   	    	WeatherService.getWeather(cityName).then(function(data){
   	      		$scope.place = data;
 				$scope.todayWeatherIcon = WeatherService.setWeatherIcon(data.item.condition.code);
@@ -184,6 +187,15 @@
 				$scope.day2Icon = WeatherService.setWeatherIcon(data.item.forecast[2].code);
 				$scope.day3Icon = WeatherService.setWeatherIcon(data.item.forecast[3].code);
 				$scope.day4Icon = WeatherService.setWeatherIcon(data.item.forecast[4].code);
+  	    	});
+		}
+		
+		function fetchSgWeather(cityName) {
+  	    	WeatherService.getWeather(cityName).then(function(data){
+  	      		$scope.place = data;
+				$scope.todayWeatherIcon = WeatherService.setWeatherIcon(data.item.condition.code);
+				$scope.todayWeatherTemp = $scope.place.item.condition.temp;
+				
   	    	});
 		}
 		
