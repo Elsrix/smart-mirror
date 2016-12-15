@@ -8,28 +8,14 @@
 		service.getWeather = function(cityName) {
 		    var deferred = $q.defer();
 			
-//			var
-// 			cityQuery = "select woeid from geo.places(1) where text='" + cityName + "'",
-// 			locationQuery = escape("select * from weather.forecast where woeid in ("+cityQuery+") and u='c'"),
-// 		    locationUrl = "https://query.yahooapis.com/v1/yql?q=" + locationQuery + "&format=json&diagnostics=true&callback=";
-	
-			/*     
-			https://query.yahooapis.com/v1/public/yql?q=SELECT%20*%20FROM%20weather.forecast%20WHERE%20location%3D%22' + zip
-			+ '%22&format=json&diagnostics=true&callback=')
-			
-			/*
-			https://query.yahooapis.com/v1/public/yql?q=
-			select%20*%20from%20weather.forecast%20where%20woeid%20in%20(
-			select%20woeid%20from%20geo.places(1)%20where%20text%3D%22singapore%2Csingapore%22
-			)&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys
-		    */
-			
 			var 
 			cityQuery = "select woeid from geo.places(1) where text='" + cityName + "'",
 			locationQuery = escape("select * from weather.forecast where woeid in ("+cityQuery+") and u='c'"),
-		    locationUrl = "https://query.yahooapis.com/v1/public/yql?q=" + locationQuery + "&format=json&env=store://datatables.org/alltableswithkeys";
-			
-			$http.get(locationUrl)
+		    locationUrl = "https://query.yahooapis.com/v1/public/yql?q=" + locationQuery + "&format=json&diagnostics=true&callback=";
+	
+			//     $http.get('https://query.yahooapis.com/v1/public/yql?q=SELECT%20*%20FROM%20weather.forecast%20WHERE%20location%3D%22' + zip
+			// + '%22&format=json&diagnostics=true&callback=')
+		    $http.get(locationUrl)
 		      .success(function(data){
 		        deferred.resolve(data.query.results.channel);
 		      })
